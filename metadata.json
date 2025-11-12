@@ -1,0 +1,5 @@
+{
+  "name": "Gemini Workout Tracker",
+  "description": "A modern, AI-powered web application to track your daily workouts. Log exercises, view your history, and get personalized workout suggestions from Gemini.",
+  "requestFramePermissions": []
+}
