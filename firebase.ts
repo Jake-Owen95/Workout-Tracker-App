@@ -3,21 +3,30 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 // =================================================================
-// TODO: Replace the following with your app's Firebase project configuration
+// TODO: Follow these steps to configure your Firebase project.
 //
 // 1. Go to the Firebase console: https://console.firebase.google.com/
 // 2. Create a new project or select an existing one.
 // 3. In your project, go to Project Settings (gear icon).
-// 4. In the "Your apps" card, click the web icon (</>) to add a web app.
+// 4. In the "Your apps" card, click the web icon (</>) to add a web app if you haven't already.
 // 5. Register your app and Firebase will provide you with a `firebaseConfig` object.
-// 6. Copy the values from that object and paste them here.
-mport { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+// 6. Copy that object and paste it below, replacing the existing one.
+// 7. Go to Authentication -> Sign-in method and enable "Email/Password".
+// 8. Go to Firestore Database -> Create database -> Start in production mode.
+//    Then, go to the "Rules" tab and paste the following rules:
+/*
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /workouts/{workoutId} {
+      allow read, write: if request.auth.uid == resource.data.userId;
+    }
+  }
+}
+*/
+// =================================================================
 
 // Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyDmTnSj6ErRq4b6CzkcHFplEiO5uZXzffE",
   authDomain: "workout-tracker-922fa.firebaseapp.com",
@@ -26,33 +35,6 @@ const firebaseConfig = {
   messagingSenderId: "854612308469",
   appId: "1:854612308469:web:c344cee96786ca5d53b0bc",
   measurementId: "G-HP75SC8K81"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-// 7. Go to Authentication -> Sign-in method and enable "Email/Password".
-// 8. Go to Firestore Database -> Create database -> Start in production mode.
-//    Then, go to the "Rules" tab and paste the following rules:
-/*
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth.uid == userId;
-    }
-  }
-}
-*/
-// =================================================================
-
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
 };
 
 // Initialize Firebase
