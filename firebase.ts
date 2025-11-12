@@ -11,6 +11,26 @@ import { getFirestore } from "firebase/firestore";
 // 4. In the "Your apps" card, click the web icon (</>) to add a web app.
 // 5. Register your app and Firebase will provide you with a `firebaseConfig` object.
 // 6. Copy the values from that object and paste them here.
+mport { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDmTnSj6ErRq4b6CzkcHFplEiO5uZXzffE",
+  authDomain: "workout-tracker-922fa.firebaseapp.com",
+  projectId: "workout-tracker-922fa",
+  storageBucket: "workout-tracker-922fa.firebasestorage.app",
+  messagingSenderId: "854612308469",
+  appId: "1:854612308469:web:c344cee96786ca5d53b0bc",
+  measurementId: "G-HP75SC8K81"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 // 7. Go to Authentication -> Sign-in method and enable "Email/Password".
 // 8. Go to Firestore Database -> Create database -> Start in production mode.
 //    Then, go to the "Rules" tab and paste the following rules:
