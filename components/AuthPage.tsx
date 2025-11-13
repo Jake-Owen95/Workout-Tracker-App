@@ -3,7 +3,7 @@ import {
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
   AuthError
-} from 'firebase/auth';
+} from 'firebase/auth.js';
 import { auth } from '../firebase';
 import { DumbbellIcon } from './Icons';
 

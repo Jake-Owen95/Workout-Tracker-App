@@ -1,6 +1,6 @@
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { initializeApp } from "firebase/app.js";
+import { getAuth } from "firebase/auth.js";
+import { getFirestore } from "firebase/firestore.js";
 
 // =================================================================
 // TODO: Follow these steps to configure your Firebase project.

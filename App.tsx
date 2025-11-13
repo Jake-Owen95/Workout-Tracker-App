@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { signOut } from 'firebase/auth';
+import { signOut } from 'firebase/auth.js';
 import { auth } from './firebase';
 import { useAuth } from './contexts/AuthContext';
 import { useWorkouts } from './hooks/useWorkouts';
