@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import type { Workout } from '../types';
 
@@ -66,7 +65,6 @@ export async function getWorkoutSuggestion(userPrompt: string): Promise<Workout[
   `;
 
   try {
-    // Call generateContent with the model name and prompt as per guidelines.
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
@@ -76,7 +74,10 @@ export async function getWorkoutSuggestion(userPrompt: string): Promise<Workout[
       },
     });
 
-    // Directly access the .text property from the response object as per guidelines.
+    if (!response.text) {
+      throw new Error("The AI returned an empty response. Please try a different prompt.");
+    }
+
     const jsonText = response.text.trim();
     const parsedResult = JSON.parse(jsonText);
 
