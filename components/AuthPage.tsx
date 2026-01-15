@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
   AuthError
-} from 'firebase/auth.js';
+} from 'firebase/auth';
 import { auth } from '../firebase';
 import { DumbbellIcon } from './Icons';
 

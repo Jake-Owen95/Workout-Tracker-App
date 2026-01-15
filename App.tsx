@@ -1,5 +1,6 @@
+
 import React, { useState, useCallback, useMemo } from 'react';
-import { signOut } from 'firebase/auth.js';
+import { signOut } from 'firebase/auth';
 import { auth } from './firebase';
 import { useAuth } from './contexts/AuthContext';
 import { useWorkouts } from './hooks/useWorkouts';
@@ -55,8 +56,11 @@ const WorkoutTracker: React.FC = () => {
   // Calculate streak
   const streak = useMemo(() => {
     if (workouts.length === 0) return 0;
-    const sortedDates = [...new Set(workouts.map(w => new Date(w.date).toDateString()))]
-      .map(d => new Date(d).getTime())
+    
+    // Fix: Ensure sortedDates mapping uses typed variables to avoid 'unknown' inference from Set spread
+    const dateStrings = workouts.map(w => new Date(w.date).toDateString());
+    const sortedDates = Array.from(new Set(dateStrings))
+      .map((d: string) => new Date(d).getTime())
       .sort((a, b) => b - a);
 
     let currentStreak = 0;

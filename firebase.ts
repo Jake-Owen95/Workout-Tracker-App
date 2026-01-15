@@ -1,6 +1,7 @@
-import { initializeApp } from "firebase/app.js";
-import { getAuth } from "firebase/auth.js";
-import { getFirestore } from "firebase/firestore.js";
+
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 // =================================================================
 // 🛠️ FIREBASE SETUP STEPS (REQUIRED TO FIX PERMISSIONS)

@@ -1,8 +1,9 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import type { Workout } from '../types';
 
-// Use a fallback empty string to prevent ReferenceError/crash if process.env.API_KEY is undefined
-const ai = new GoogleGenAI({ apiKey: (process.env.API_KEY || '') as string });
+// Initialize the GoogleGenAI client using the API key from the environment variable as per guidelines.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const workoutPlanSchema = {
   type: Type.ARRAY,
@@ -65,6 +66,7 @@ export async function getWorkoutSuggestion(userPrompt: string): Promise<Workout[
   `;
 
   try {
+    // Call generateContent with the model name and prompt as per guidelines.
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
@@ -74,6 +76,7 @@ export async function getWorkoutSuggestion(userPrompt: string): Promise<Workout[
       },
     });
 
+    // Directly access the .text property from the response object as per guidelines.
     const jsonText = response.text.trim();
     const parsedResult = JSON.parse(jsonText);
 

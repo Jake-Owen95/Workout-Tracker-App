@@ -1,5 +1,6 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth.js';
+import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '../firebase';
 
 interface AuthContextType {
@@ -15,6 +16,7 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+// Fix: Imported React to use React.FC and resolve namespace issues
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);

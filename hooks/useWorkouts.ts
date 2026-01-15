@@ -1,5 +1,6 @@
+
 import { useState, useEffect, useCallback } from 'react';
-import { collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, where, FirestoreError } from 'firebase/firestore.js';
+import { collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, where, FirestoreError } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import type { Workout } from '../types';
