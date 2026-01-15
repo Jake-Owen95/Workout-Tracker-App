@@ -1,7 +1,8 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { Workout } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+// Use a fallback empty string to prevent ReferenceError/crash if process.env.API_KEY is undefined
+const ai = new GoogleGenAI({ apiKey: (process.env.API_KEY || '') as string });
 
 const workoutPlanSchema = {
   type: Type.ARRAY,

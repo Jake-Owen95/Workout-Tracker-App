@@ -14,6 +14,14 @@
         font-family: 'Inter', sans-serif;
       }
     </style>
+    <script>
+      /** 
+       * Polyfill for process.env. 
+       * This prevents "ReferenceError: process is not defined" on GitHub Pages 
+       * or other static hosting environments without a build step.
+       */
+      window.process = window.process || { env: {} };
+    </script>
   <script type="importmap">
 {
   "imports": {
@@ -28,6 +36,7 @@
 </head>
   <body class="bg-gray-900 text-gray-100">
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+    <!-- Changed "/index.tsx" to "index.tsx" (relative path) for GitHub Pages compatibility -->
+    <script type="module" src="index.tsx"></script>
   </body>
 </html>
