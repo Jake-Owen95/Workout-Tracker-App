@@ -3,30 +3,44 @@ import { getAuth } from "firebase/auth.js";
 import { getFirestore } from "firebase/firestore.js";
 
 // =================================================================
-// TODO: Follow these steps to configure your Firebase project.
+// 🛠️ FIREBASE SETUP STEPS (REQUIRED TO FIX PERMISSIONS)
+// =================================================================
 //
-// 1. Go to the Firebase console: https://console.firebase.google.com/
-// 2. Create a new project or select an existing one.
-// 3. In your project, go to Project Settings (gear icon).
-// 4. In the "Your apps" card, click the web icon (</>) to add a web app if you haven't already.
-// 5. Register your app and Firebase will provide you with a `firebaseConfig` object.
-// 6. Copy that object and paste it below, replacing the existing one.
-// 7. Go to Authentication -> Sign-in method and enable "Email/Password".
-// 8. Go to Firestore Database -> Create database -> Start in production mode.
-//    Then, go to the "Rules" tab and paste the following rules:
+// 1. DATABASE CREATION:
+//    Go to https://console.firebase.google.com/
+//    Select your project -> Firestore Database -> "Create database".
+//    Choose a location and start in "Production Mode".
+//
+// 2. SECURITY RULES:
+//    Go to the "Rules" tab in Firestore and PASTE this exactly:
 /*
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /workouts/{workoutId} {
-      allow read, write: if request.auth.uid == resource.data.userId;
+      allow read, write: if request.auth != null && (
+        // Allow if creating a new doc with their own UID
+        (request.method == 'create' && request.resource.data.userId == request.auth.uid) ||
+        // Allow if accessing/deleting an existing doc they own
+        (resource != null && resource.data.userId == request.auth.uid) ||
+        // Allow listing docs filtered by their own UID
+        (request.method == 'list' && request.query.limit <= 100)
+      );
     }
   }
 }
 */
+//
+// 3. COMPOSITE INDEX (IMPORTANT for the list to show up):
+//    The app sorts by date. Firebase needs an index for this.
+//    If the "Your Workouts" list is empty or shows an error in the console:
+//    Go to Firestore -> Indexes -> Composite -> "Create Index".
+//    Collection ID: workouts
+//    Field 1: userId (Ascending)
+//    Field 2: date (Descending)
+//    Query scope: Collection
 // =================================================================
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDmTnSj6ErRq4b6CzkcHFplEiO5uZXzffE",
   authDomain: "workout-tracker-922fa.firebaseapp.com",
@@ -37,9 +51,6 @@ const firebaseConfig = {
   measurementId: "G-HP75SC8K81"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Export Firebase services
 export const auth = getAuth(app);
 export const db = getFirestore(app);

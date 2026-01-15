@@ -49,7 +49,7 @@ export const AuthPage: React.FC = () => {
       <div className="flex items-center gap-3 mb-8">
         <DumbbellIcon className="h-10 w-10 text-indigo-400" />
         <h1 className="text-4xl font-bold tracking-tight text-white">
-          Gemini Fitness
+          LWJ Workout Tracker
         </h1>
       </div>
       <div className="w-full max-w-md bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-700">

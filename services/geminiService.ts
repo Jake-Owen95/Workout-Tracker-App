@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import type { Workout } from '../types';
 
@@ -66,7 +65,7 @@ export async function getWorkoutSuggestion(userPrompt: string): Promise<Workout[
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",

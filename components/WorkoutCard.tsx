@@ -1,7 +1,6 @@
-
 import React from 'react';
 import type { Workout, WorkoutSet } from '../types';
-import { TrashIcon, TrendingUpIcon, TrendingDownIcon, DuplicateIcon } from './Icons';
+import { TrashIcon, TrendingUpIcon, TrendingDownIcon, DuplicateIcon, TrophyIcon } from './Icons';
 
 interface WorkoutCardProps {
   workout: Workout;
@@ -18,36 +17,39 @@ const getSetComparison = (
   currentExerciseName: string,
   setIndex: number,
   previousWorkout: Workout | undefined
-): { text: string; colorClass: string; } | null => {
+): { text: string; colorClass: string; isPR: boolean } | null => {
   if (!previousWorkout) return null;
 
   const previousExercise = previousWorkout.exercises.find(
     ex => ex.name.trim().toLowerCase() === currentExerciseName.trim().toLowerCase()
   );
-  if (!previousExercise) return { text: 'New Exercise', colorClass: 'text-blue-400' };
+  if (!previousExercise) return { text: 'New', colorClass: 'text-blue-400', isPR: false };
 
   const previousSet = previousExercise.sets[setIndex];
-  if (!previousSet) return { text: 'New Set', colorClass: 'text-blue-400' };
+  if (!previousSet) return { text: 'New', colorClass: 'text-blue-400', isPR: false };
 
   const weightDelta = currentSet.weight - previousSet.weight;
   const repsDelta = currentSet.reps - previousSet.reps;
   const volumeDelta = (currentSet.reps * currentSet.weight) - (previousSet.reps * previousSet.weight);
 
+  const isPR = weightDelta > 0;
+
   if (weightDelta === 0 && repsDelta === 0) {
-    return { text: 'No Change', colorClass: 'text-gray-500' };
+    return { text: 'Same', colorClass: 'text-gray-600', isPR: false };
   }
 
   const parts = [];
   if (weightDelta !== 0) {
-    parts.push(`${weightDelta > 0 ? '+' : ''}${weightDelta} kg`);
+    parts.push(`${weightDelta > 0 ? '+' : ''}${weightDelta}kg`);
   }
   if (repsDelta !== 0) {
-    parts.push(`${repsDelta > 0 ? '+' : ''}${repsDelta} reps`);
+    parts.push(`${repsDelta > 0 ? '+' : ''}${repsDelta}r`);
   }
 
   return {
     text: parts.join(', '),
     colorClass: volumeDelta >= 0 ? 'text-green-400' : 'text-red-400',
+    isPR,
   };
 };
 
@@ -66,10 +68,10 @@ const OverallPerformance: React.FC<{ workout: Workout, previousWorkout?: Workout
   const sign = delta > 0 ? '+' : '';
 
   return (
-    <div className={`flex items-center gap-2 text-xs font-semibold p-2 rounded-lg mb-4 ${bgColorClass} ${colorClass}`}>
+    <div className={`flex items-center gap-2 text-xs font-bold p-2.5 rounded-xl mb-6 ${bgColorClass} ${colorClass} border border-current/10`}>
       {isUp && <TrendingUpIcon className="h-4 w-4" />}
       {isDown && <TrendingDownIcon className="h-4 w-4" />}
-      <span>Total Volume: {sign}{delta.toLocaleString()} kg vs last time</span>
+      <span>{sign}{delta.toLocaleString()} kg total volume vs last</span>
     </div>
   );
 };
@@ -78,25 +80,27 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({ workout, previousWorko
   const totalWeight = calculateTotalVolume(workout);
 
   return (
-    <div className="bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col justify-between hover:shadow-indigo-500/20 transition-all duration-300 border border-gray-700 hover:border-indigo-500/50 transform hover:-translate-y-1">
+    <div className="bg-gray-900/50 rounded-[2rem] p-7 flex flex-col justify-between hover:bg-gray-900 transition-all duration-500 border border-white/5 hover:border-indigo-500/30 group shadow-xl">
       <div>
-        <div className="flex justify-between items-start mb-2">
+        <div className="flex justify-between items-start mb-4">
           <div>
-            <h3 className="text-xl font-bold text-white">{workout.name}</h3>
-            <p className="text-sm text-gray-400">{new Date(workout.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            <h3 className="text-2xl font-black text-white group-hover:text-indigo-400 transition-colors">{workout.name}</h3>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">
+              {new Date(workout.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+            </p>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center gap-1">
             <button
               onClick={() => onDuplicate(workout.id)}
-              className="text-gray-500 hover:text-indigo-400 transition-colors p-1"
-              aria-label={`Duplicate workout ${workout.name}`}
+              className="text-gray-600 hover:text-indigo-400 transition-all p-2 hover:bg-white/5 rounded-xl"
+              aria-label="Repeat workout"
             >
               <DuplicateIcon className="h-5 w-5" />
             </button>
             <button 
               onClick={() => onDelete(workout.id)}
-              className="text-gray-500 hover:text-red-500 transition-colors p-1"
-              aria-label={`Delete workout ${workout.name}`}
+              className="text-gray-600 hover:text-red-500 transition-all p-2 hover:bg-white/5 rounded-xl"
+              aria-label="Delete"
             >
               <TrashIcon className="h-5 w-5" />
             </button>
@@ -105,22 +109,39 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({ workout, previousWorko
 
         <OverallPerformance workout={workout} previousWorkout={previousWorkout} />
 
-        <ul className="space-y-3 mb-4 max-h-48 overflow-y-auto pr-2">
+        <ul className="space-y-4 mb-6">
           {workout.exercises.map((ex) => (
-            <li key={ex.id} className="text-sm text-gray-300">
-              <p className="font-semibold text-gray-200 truncate">{ex.name}</p>
-              <div className="text-gray-400 font-mono text-xs pl-2 space-y-1 mt-1">
+            <li key={ex.id} className="bg-white/[0.02] p-4 rounded-2xl border border-white/5">
+              <p className="font-bold text-gray-200 text-sm mb-3 flex items-center justify-between">
+                <span>{ex.name}</span>
+                {ex.sets.some((s, i) => getSetComparison(s, ex.name, i, previousWorkout)?.isPR) && (
+                  <span className="bg-yellow-500/10 text-yellow-500 text-[10px] px-2 py-0.5 rounded-full border border-yellow-500/20 flex items-center gap-1">
+                    <TrophyIcon className="h-3 w-3" /> PR
+                  </span>
+                )}
+              </p>
+              <div className="space-y-2">
                 {ex.sets.map((s, i) => {
-                  const comparison = getSetComparison(s, ex.name, i, previousWorkout);
+                  const comp = getSetComparison(s, ex.name, i, previousWorkout);
                   return (
-                    <div key={s.id} className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="bg-gray-700 rounded-full px-1.5 text-gray-300 text-[10px] w-5 h-5 flex items-center justify-center">{i + 1}</span>
-                        <span>{s.reps} reps</span>
-                        <span className="text-gray-500">@</span>
-                        <span>{s.weight} kg</span>
+                    <div key={s.id} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-3">
+                        <span className="text-gray-600 font-mono w-4">#{i + 1}</span>
+                        <div className="flex items-center gap-1 font-mono">
+                          <span className="text-gray-300 font-bold">{s.reps}</span>
+                          <span className="text-gray-600">×</span>
+                          <span className="text-gray-300 font-bold">{s.weight}</span>
+                          <span className="text-gray-600 text-[10px] ml-0.5">KG</span>
+                        </div>
                       </div>
-                      {comparison && <span className={`font-semibold ${comparison.colorClass}`}>{comparison.text}</span>}
+                      {comp && (
+                        <div className="flex items-center gap-1.5">
+                           {comp.isPR && <TrophyIcon className="h-3 w-3 text-yellow-500" />}
+                           <span className={`font-mono font-bold tracking-tighter ${comp.colorClass}`}>
+                            {comp.text}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -130,18 +151,18 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({ workout, previousWorko
         </ul>
       </div>
 
-      <div className="border-t border-gray-700 pt-4 mt-4 flex justify-around text-center">
-        <div>
-          <p className="text-xs text-gray-400 uppercase tracking-wider">Exercises</p>
-          <p className="text-lg font-semibold text-indigo-400">{workout.exercises.length}</p>
+      <div className="grid grid-cols-3 gap-2 pt-6 border-t border-white/5">
+        <div className="text-center">
+          <p className="text-[10px] text-gray-600 font-black uppercase tracking-tighter mb-1">Items</p>
+          <p className="text-base font-black text-white">{workout.exercises.length}</p>
         </div>
-        <div>
-          <p className="text-xs text-gray-400 uppercase tracking-wider">Total Sets</p>
-          <p className="text-lg font-semibold text-indigo-400">{workout.exercises.reduce((acc, ex) => acc + ex.sets.length, 0)}</p>
+        <div className="text-center border-x border-white/5 px-2">
+          <p className="text-[10px] text-gray-600 font-black uppercase tracking-tighter mb-1">Sets</p>
+          <p className="text-base font-black text-white">{workout.exercises.reduce((acc, ex) => acc + ex.sets.length, 0)}</p>
         </div>
-        <div>
-          <p className="text-xs text-gray-400 uppercase tracking-wider">Volume (kg)</p>
-          <p className="text-lg font-semibold text-indigo-400">{totalWeight.toLocaleString()}</p>
+        <div className="text-center">
+          <p className="text-[10px] text-gray-600 font-black uppercase tracking-tighter mb-1">Load</p>
+          <p className="text-base font-black text-indigo-400">{totalWeight > 999 ? (totalWeight/1000).toFixed(1)+'k' : totalWeight}</p>
         </div>
       </div>
     </div>
