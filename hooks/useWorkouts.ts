@@ -1,6 +1,5 @@
-
 import { useState, useEffect, useCallback } from 'react';
-import { collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, where, FirestoreError } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy, where, FirestoreError } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import type { Workout } from '../types';
@@ -20,15 +19,14 @@ export const useWorkouts = () => {
 
         setError(null);
         const workoutsCollectionRef = collection(db, 'workouts');
-        // This query requires a Composite Index in Firebase: userId (Asc), date (Desc)
         const q = query(
             workoutsCollectionRef, 
             where("userId", "==", currentUser.uid), 
             orderBy('date', 'desc')
         );
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const workoutsData = snapshot.docs.map(doc => ({
+        const unsubscribe = onSnapshot(q, (snapshot: any) => {
+            const workoutsData = snapshot.docs.map((doc: any) => ({
                 id: doc.id,
                 ...doc.data(),
             })) as Workout[];
@@ -54,15 +52,29 @@ export const useWorkouts = () => {
         const workoutData = { 
             ...workout, 
             userId: currentUser.uid,
-            createdAt: new Date().toISOString() // Useful for internal tracking
+            createdAt: new Date().toISOString()
         };
         const workoutsCollectionRef = collection(db, 'workouts');
         try {
             await addDoc(workoutsCollectionRef, workoutData);
         } catch (err: any) {
             if (err.code === 'permission-denied') {
-                throw new Error("Permission denied: Ensure you've updated your Firebase Security Rules in the console.");
+                throw new Error("Permission denied: Ensure you've updated your Firebase Security Rules.");
             }
+            throw err;
+        }
+    }, [currentUser]);
+
+    const updateWorkout = useCallback(async (id: string, workout: Partial<Workout>) => {
+        if (!currentUser) throw new Error("No user logged in");
+        const workoutDocRef = doc(db, 'workouts', id);
+        try {
+            await updateDoc(workoutDocRef, {
+                ...workout,
+                updatedAt: new Date().toISOString()
+            });
+        } catch (err: any) {
+            console.error("Update failed:", err);
             throw err;
         }
     }, [currentUser]);
@@ -73,5 +85,5 @@ export const useWorkouts = () => {
         await deleteDoc(workoutDocRef);
     }, [currentUser]);
 
-    return { workouts, addWorkout, deleteWorkout, loading, error };
+    return { workouts, addWorkout, updateWorkout, deleteWorkout, loading, error };
 };

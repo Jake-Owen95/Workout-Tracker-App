@@ -26,7 +26,8 @@ export const AuthPage: React.FC = () => {
         await createUserWithEmailAndPassword(auth, email, password);
       }
     } catch (err) {
-      const authError = err as AuthError;
+      // Fix: Cast error to any to ensure access to the 'code' property regardless of specific type definition
+      const authError = err as any;
       switch (authError.code) {
         case 'auth/user-not-found':
         case 'auth/wrong-password':

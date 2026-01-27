@@ -1,12 +1,13 @@
 import React from 'react';
 import type { Workout, WorkoutSet } from '../types';
-import { TrashIcon, TrendingUpIcon, TrendingDownIcon, DuplicateIcon, TrophyIcon } from './Icons';
+import { TrashIcon, TrendingUpIcon, TrendingDownIcon, DuplicateIcon, TrophyIcon, EditIcon } from './Icons';
 
 interface WorkoutCardProps {
   workout: Workout;
   previousWorkout?: Workout;
   onDelete: (id: string) => void;
   onDuplicate: (id: string) => void;
+  onEdit: (id: string) => void;
 }
 
 const calculateTotalVolume = (w: Workout): number => 
@@ -76,7 +77,7 @@ const OverallPerformance: React.FC<{ workout: Workout, previousWorkout?: Workout
   );
 };
 
-export const WorkoutCard: React.FC<WorkoutCardProps> = ({ workout, previousWorkout, onDelete, onDuplicate }) => {
+export const WorkoutCard: React.FC<WorkoutCardProps> = ({ workout, previousWorkout, onDelete, onDuplicate, onEdit }) => {
   const totalWeight = calculateTotalVolume(workout);
 
   return (
@@ -90,6 +91,13 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({ workout, previousWorko
             </p>
           </div>
           <div className="flex items-center gap-1">
+            <button
+              onClick={() => onEdit(workout.id)}
+              className="text-gray-600 hover:text-indigo-400 transition-all p-2 hover:bg-white/5 rounded-xl"
+              aria-label="Edit workout"
+            >
+              <EditIcon className="h-5 w-5" />
+            </button>
             <button
               onClick={() => onDuplicate(workout.id)}
               className="text-gray-600 hover:text-indigo-400 transition-all p-2 hover:bg-white/5 rounded-xl"

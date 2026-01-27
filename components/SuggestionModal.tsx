@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { getWorkoutSuggestion } from '../services/geminiService';
 import type { Workout } from '../types';
@@ -38,8 +39,10 @@ export const SuggestionModal: React.FC<SuggestionModalProps> = ({ onClose, onSug
     }
   };
 
+  // Dummy handlers for suggestions view as interactions are for preview only
   const dummyDelete = () => {};
   const dummyDuplicate = () => {};
+  const dummyEdit = () => {};
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
@@ -92,7 +95,14 @@ export const SuggestionModal: React.FC<SuggestionModalProps> = ({ onClose, onSug
                 <h3 className="text-xl font-semibold text-white">Suggested Plan</h3>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {suggestedWorkouts.map((w) => (
-                        <WorkoutCard key={w.id} workout={w} onDelete={dummyDelete} onDuplicate={dummyDuplicate} />
+                        /* Added missing onEdit prop to satisfy WorkoutCard component requirements */
+                        <WorkoutCard 
+                          key={w.id} 
+                          workout={w} 
+                          onDelete={dummyDelete} 
+                          onDuplicate={dummyDuplicate} 
+                          onEdit={dummyEdit} 
+                        />
                     ))}
                 </div>
               </div>
