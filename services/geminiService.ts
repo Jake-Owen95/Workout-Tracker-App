@@ -1,9 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { Workout } from '../types';
 
-// Initialize the GoogleGenAI client using the API key from the environment variable as per guidelines.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 const workoutPlanSchema = {
   type: Type.ARRAY,
   description: "A list of workout sessions that form a complete workout plan.",
@@ -51,8 +48,15 @@ const workoutPlanSchema = {
   }
 };
 
-
 export async function getWorkoutSuggestion(userPrompt: string): Promise<Workout[]> {
+  // Initialize the client inside the call to handle potential missing keys gracefully at runtime
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    throw new Error("Gemini API key is not configured. Please add VITE_API_KEY to your .env file.");
+  }
+  
+  const ai = new GoogleGenAI({ apiKey });
+  
   const prompt = `
     Based on the user's request, create a structured workout plan. 
     The plan should be returned as a JSON array of workout objects. 
