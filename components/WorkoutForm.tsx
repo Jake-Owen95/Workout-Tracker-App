@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { Workout, Exercise, WorkoutSet } from '../types';
-import { PlusIcon, TrashIcon } from './Icons';
+import { PlusIcon, TrashIcon, CalendarIcon } from './Icons';
 
 interface WorkoutFormProps {
   onWorkoutAdded: (workout: Omit<Workout, 'id'>) => Promise<void>;
@@ -25,6 +25,7 @@ export const WorkoutForm: React.FC<WorkoutFormProps> = ({
   mode = 'create'
 }) => {
   const [workoutName, setWorkoutName] = useState('');
+  const [workoutDate, setWorkoutDate] = useState<string>('');
   const [exercises, setExercises] = useState<FormExercise[]>([DEFAULT_EXERCISE]);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,16 +33,24 @@ export const WorkoutForm: React.FC<WorkoutFormProps> = ({
   useEffect(() => {
     if (initialWorkout) {
       setWorkoutName(initialWorkout.name);
+      
+      // Preserve date if editing, otherwise set to now for duplication
+      if (mode === 'edit') {
+        setWorkoutDate(initialWorkout.date);
+      } else {
+        setWorkoutDate(new Date().toISOString());
+      }
+
       setExercises(initialWorkout.exercises.map(ex => ({
         name: ex.name,
         sets: ex.sets.map(s => ({ reps: s.reps, weight: s.weight }))
       })));
     } else {
       setWorkoutName('');
-      // Use empty strings for the fresh form state
+      setWorkoutDate(new Date().toISOString());
       setExercises([{ name: '', sets: [{ reps: "", weight: "" }] }]);
     }
-  }, [initialWorkout]);
+  }, [initialWorkout, mode]);
 
 
   const handleExerciseNameChange = (exIndex: number, name: string) => {
@@ -70,8 +79,6 @@ export const WorkoutForm: React.FC<WorkoutFormProps> = ({
   const addSet = (exIndex: number) => {
     const newExercises = [...exercises];
     const lastSet = newExercises[exIndex].sets[newExercises[exIndex].sets.length - 1] || { reps: "", weight: "" };
-    // We duplicate the values for convenient progressive overload, 
-    // but the auto-select on focus makes them easy to clear.
     newExercises[exIndex].sets.push({ ...lastSet });
     setExercises(newExercises);
   };
@@ -94,11 +101,9 @@ export const WorkoutForm: React.FC<WorkoutFormProps> = ({
     }
   };
 
-  // Prevent accidental Enter key submissions
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       const target = e.target as HTMLElement;
-      // Only allow enter if user is specifically on the submit button
       if (target.tagName !== 'BUTTON' || target.getAttribute('type') !== 'submit') {
         e.preventDefault();
       }
@@ -124,12 +129,12 @@ export const WorkoutForm: React.FC<WorkoutFormProps> = ({
     const now = Date.now();
     const workoutPayload = {
       name: workoutName,
+      date: workoutDate, // Use the state-held date (preserved for edit, new for create/duplicate)
       exercises: exercises.map((ex, exIndex) => ({
         id: `ex-${now}-${exIndex}`,
         name: ex.name,
         sets: ex.sets.map((set, setIndex) => ({
           id: `set-${now}-${exIndex}-${setIndex}`,
-          // Sanitize empty strings to 0 on save for data consistency
           reps: set.reps === "" ? 0 : set.reps,
           weight: set.weight === "" ? 0 : set.weight,
         })),
@@ -140,24 +145,32 @@ export const WorkoutForm: React.FC<WorkoutFormProps> = ({
       if (mode === 'edit' && initialWorkout && onWorkoutUpdated) {
         await onWorkoutUpdated(initialWorkout.id, workoutPayload);
       } else {
-        await onWorkoutAdded({
-          ...workoutPayload,
-          date: new Date().toISOString()
-        });
+        await onWorkoutAdded(workoutPayload);
       }
     } catch (err) {
       console.error("Failed to save workout:", err);
-      setError(err instanceof Error ? err.message : 'Failed to save workout. Please check your connection and try again.');
+      setError(err instanceof Error ? err.message : 'Failed to save workout. Please try again.');
       setIsSaving(false);
     }
   };
 
   const title = mode === 'edit' ? 'Edit Workout' : mode === 'duplicate' ? `Duplicate: ${initialWorkout?.name}` : 'Log New Workout';
   const submitLabel = mode === 'edit' ? 'Update Workout' : 'Save Workout';
+  
+  const displayDate = workoutDate 
+    ? new Date(workoutDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })
+    : 'Loading...';
 
   return (
     <div className="bg-gray-800 rounded-xl shadow-lg p-6 sm:p-8 border border-gray-700 max-w-2xl mx-auto" onKeyDown={handleKeyDown}>
-      <h2 className="text-2xl font-bold text-white mb-6">{title}</h2>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <h2 className="text-2xl font-bold text-white">{title}</h2>
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-700/50 rounded-lg border border-gray-600">
+          <CalendarIcon className="h-4 w-4 text-indigo-400" />
+          <span className="text-xs font-semibold text-gray-300 uppercase tracking-wider">{displayDate}</span>
+        </div>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label htmlFor="workoutName" className="block text-sm font-medium text-gray-300 mb-2">
