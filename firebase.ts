@@ -4,54 +4,48 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 // =================================================================
-// 🛠️ FIREBASE SETUP STEPS (REQUIRED TO FIX PERMISSIONS)
+// 🛠️ MULTI-ENVIRONMENT CONFIGURATION
 // =================================================================
+// The app now uses environment variables to distinguish between 
+// "Development" (Local) and "Production" (Stable/GitHub Pages).
 //
-// 1. DATABASE CREATION:
-//    Go to https://console.firebase.google.com/
-//    Select your project -> Firestore Database -> "Create database".
-//    Choose a location and start in "Production Mode".
-//
-// 2. SECURITY RULES:
-//    Go to the "Rules" tab in Firestore and PASTE this exactly:
-/*
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /workouts/{workoutId} {
-      allow read, write: if request.auth != null && (
-        // Allow if creating a new doc with their own UID
-        (request.method == 'create' && request.resource.data.userId == request.auth.uid) ||
-        // Allow if accessing/deleting an existing doc they own
-        (resource != null && resource.data.userId == request.auth.uid) ||
-        // Allow listing docs filtered by their own UID
-        (request.method == 'list' && request.query.limit <= 100)
-      );
-    }
-  }
-}
-*/
-//
-// 3. COMPOSITE INDEX (IMPORTANT for the list to show up):
-//    The app sorts by date. Firebase needs an index for this.
-//    If the "Your Workouts" list is empty or shows an error in the console:
-//    Go to Firestore -> Indexes -> Composite -> "Create Index".
-//    Collection ID: workouts
-//    Field 1: userId (Ascending)
-//    Field 2: date (Descending)
-//    Query scope: Collection
+// Create .env.development and .env.production in your project root.
+// Variables must start with VITE_ to be accessible via import.meta.env.
 // =================================================================
+
+// Fix: Use a type assertion to access Vite-specific environment variables without global type definitions for import.meta.env
+const env = (import.meta as any).env;
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDmTnSj6ErRq4b6CzkcHFplEiO5uZXzffE",
-  authDomain: "workout-tracker-922fa.firebaseapp.com",
-  projectId: "workout-tracker-922fa",
-  storageBucket: "workout-tracker-922fa.firebasestorage.app",
-  messagingSenderId: "854612308469",
-  appId: "1:854612308469:web:c344cee96786ca5d53b0bc",
-  measurementId: "G-HP75SC8K81"
+  apiKey: env.VITE_FIREBASE_API_KEY,
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: env.VITE_FIREBASE_APP_ID,
+  measurementId: env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// Export services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+/**
+ * SECURITY RULES REMINDER (Apply to BOTH projects):
+ * 
+ * rules_version = '2';
+ * service cloud.firestore {
+ *   match /databases/{database}/documents {
+ *     match /workouts/{workoutId} {
+ *       allow read, write: if request.auth != null && (
+ *         (request.method == 'create' && request.resource.data.userId == request.auth.uid) ||
+ *         (resource != null && resource.data.userId == request.auth.uid) ||
+ *         (request.method == 'list' && request.query.limit <= 100)
+ *       );
+ *     }
+ *   }
+ * }
+ */
