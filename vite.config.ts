@@ -3,7 +3,9 @@ import react from '@vitejs/plugin-react';
 import process from 'node:process';
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
+  // Use process.cwd() with a type cast to any to resolve the TypeScript error 
+  // where 'cwd' might not be recognized on the Process type in some environments.
+  const env = loadEnv(mode, (process as any).cwd(), '');
   return {
     plugins: [react()],
     base: './',

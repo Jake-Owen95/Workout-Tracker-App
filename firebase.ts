@@ -5,10 +5,11 @@ import { getAuth } from "firebase/auth";
 // @ts-ignore
 import { getFirestore } from "firebase/firestore";
 
-// Helper to get env vars from either Vite or Process (defined in vite.config)
+// Helper to get env vars from either Vite or Process
 const getEnv = (key: string) => {
   const value = (import.meta as any).env?.[key] || (process.env as any)?.[key];
-  return value === "undefined" ? undefined : value;
+  // Filter out the literal string "undefined" which sometimes happens during build injection
+  return (value === "undefined" || !value) ? undefined : value;
 };
 
 const firebaseConfig = {
@@ -21,9 +22,11 @@ const firebaseConfig = {
   measurementId: getEnv('VITE_FIREBASE_MEASUREMENT_ID')
 };
 
-// Initialization check
-if (!firebaseConfig.apiKey) {
-  console.error("CRITICAL: Firebase API Key is missing! Check your .env file or GitHub Secrets.");
+// Check if config is actually present
+export const isFirebaseConfigured = !!firebaseConfig.apiKey && firebaseConfig.apiKey !== "";
+
+if (!isFirebaseConfigured) {
+  console.error("CRITICAL: Firebase configuration is missing. Ensure VITE_FIREBASE_API_KEY is set.");
 }
 
 const app = initializeApp(firebaseConfig);

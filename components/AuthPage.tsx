@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 // @ts-ignore
 import { 
   createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword,
-  AuthError
+  signInWithEmailAndPassword
 } from 'firebase/auth';
 import { auth } from '../firebase';
 import { DumbbellIcon } from './Icons';
@@ -26,7 +25,11 @@ export const AuthPage: React.FC = () => {
         await createUserWithEmailAndPassword(auth, email, password);
       }
     } catch (err: any) {
-      console.error("Auth Error:", err);
+      console.error("Auth Error Object:", err);
+      
+      const errorCode = err.code || 'unknown-error';
+      const errorMessage = err.message || 'An unexpected error occurred.';
+
       // provide more detailed feedback
       switch (err.code) {
         case 'auth/user-not-found':
@@ -41,10 +44,13 @@ export const AuthPage: React.FC = () => {
           setError('Password should be at least 6 characters.');
           break;
         case 'auth/operation-not-allowed':
-          setError('Email/Password login is not enabled in the Firebase Console.');
+          setError('Email/Password login is not enabled in Firebase Console.');
+          break;
+        case 'auth/invalid-api-key':
+          setError('Firebase API Key is invalid. Check your environment variables.');
           break;
         default:
-          setError(err.message || 'An error occurred. Please try again.');
+          setError(`[${errorCode}] ${errorMessage}`);
       }
       setLoading(false);
     }
@@ -104,7 +110,7 @@ export const AuthPage: React.FC = () => {
 
           {error && (
             <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl">
-              <p className="text-red-400 text-sm text-center font-bold tracking-tight">{error}</p>
+              <p className="text-red-400 text-sm text-center font-bold tracking-tight leading-relaxed">{error}</p>
             </div>
           )}
 

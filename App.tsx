@@ -1,8 +1,7 @@
-
 import React, { useState, useCallback, useMemo } from 'react';
 // @ts-ignore
 import { signOut } from 'firebase/auth';
-import { auth } from './firebase';
+import { auth, isFirebaseConfigured } from './firebase';
 import { useAuth } from './contexts/AuthContext';
 import { useWorkouts } from './hooks/useWorkouts';
 import type { Workout } from './types';
@@ -296,6 +295,29 @@ const WorkoutTracker: React.FC = () => {
 
 const App: React.FC = () => {
   const { currentUser, loading } = useAuth();
+
+  if (!isFirebaseConfigured) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-950 p-10 text-center">
+        <div className="bg-red-500/10 p-6 rounded-full mb-8">
+           <DumbbellIcon className="h-16 w-16 text-red-500" />
+        </div>
+        <h1 className="text-3xl font-black text-white mb-4 uppercase tracking-tight">Configuration Required</h1>
+        <p className="text-gray-400 max-w-md mb-8 leading-relaxed">
+          Your Firebase environment variables (API Key, Project ID, etc.) are missing or invalid. 
+          Please check your <code className="bg-white/5 px-2 py-1 rounded text-indigo-400">.env</code> file or GitHub Secrets.
+        </p>
+        <div className="bg-white/5 p-6 rounded-3xl border border-white/10 text-left w-full max-w-lg">
+           <p className="text-xs font-black text-gray-500 uppercase mb-4 tracking-widest">Expected Variables:</p>
+           <ul className="text-xs font-mono space-y-2 text-gray-300">
+             <li>• VITE_FIREBASE_API_KEY</li>
+             <li>• VITE_FIREBASE_PROJECT_ID</li>
+             <li>• VITE_FIREBASE_AUTH_DOMAIN</li>
+           </ul>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
