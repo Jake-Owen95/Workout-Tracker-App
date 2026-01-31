@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 // @ts-ignore
 import { 
@@ -26,12 +25,13 @@ export const AuthPage: React.FC = () => {
       } else {
         await createUserWithEmailAndPassword(auth, email, password);
       }
-    } catch (err) {
-      // Fix: Cast error to any to ensure access to the 'code' property regardless of specific type definition
-      const authError = err as any;
-      switch (authError.code) {
+    } catch (err: any) {
+      console.error("Auth Error:", err);
+      // provide more detailed feedback
+      switch (err.code) {
         case 'auth/user-not-found':
         case 'auth/wrong-password':
+        case 'auth/invalid-credential':
           setError('Invalid email or password.');
           break;
         case 'auth/email-already-in-use':
@@ -40,28 +40,40 @@ export const AuthPage: React.FC = () => {
         case 'auth/weak-password':
           setError('Password should be at least 6 characters.');
           break;
+        case 'auth/operation-not-allowed':
+          setError('Email/Password login is not enabled in the Firebase Console.');
+          break;
         default:
-          setError('An error occurred. Please try again.');
+          setError(err.message || 'An error occurred. Please try again.');
       }
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 p-4">
-      <div className="flex items-center gap-3 mb-8">
-        <DumbbellIcon className="h-10 w-10 text-indigo-400" />
-        <h1 className="text-4xl font-bold tracking-tight text-white">
-          LWJ Workout Tracker
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-950 p-4 font-sans">
+      <div className="flex items-center gap-4 mb-10 animate-in fade-in slide-in-from-top-4 duration-700">
+        <div className="bg-indigo-600 p-3 rounded-2xl shadow-xl shadow-indigo-600/20">
+          <DumbbellIcon className="h-8 w-8 text-white" />
+        </div>
+        <h1 className="text-3xl font-black tracking-tight text-white uppercase">
+          LWJ <span className="text-indigo-400">Tracker</span>
         </h1>
       </div>
-      <div className="w-full max-w-md bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-700">
-        <h2 className="text-2xl font-bold text-white text-center mb-6">
-          {isLoginView ? 'Welcome Back' : 'Create Your Account'}
-        </h2>
+
+      <div className="w-full max-w-md bg-gray-900 rounded-[2.5rem] shadow-2xl p-10 border border-white/5 animate-in zoom-in-95 duration-500">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-black text-white mb-2">
+            {isLoginView ? 'Welcome Back' : 'Get Started'}
+          </h2>
+          <p className="text-gray-500 font-medium">
+            {isLoginView ? 'Enter your details to log in' : 'Create an account to track gains'}
+          </p>
+        </div>
+
         <form onSubmit={handleAuthAction} className="space-y-6">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+          <div className="space-y-2">
+            <label htmlFor="email" className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">
               Email Address
             </label>
             <input
@@ -69,12 +81,14 @@ export const AuthPage: React.FC = () => {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+              className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none placeholder:text-gray-600"
+              placeholder="name@example.com"
               required
             />
           </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+          
+          <div className="space-y-2">
+            <label htmlFor="password" className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">
               Password
             </label>
             <input
@@ -82,33 +96,46 @@ export const AuthPage: React.FC = () => {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+              className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none placeholder:text-gray-600"
+              placeholder="••••••••"
               required
             />
           </div>
-          {error && <p className="text-red-400 text-sm text-center">{error}</p>}
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex justify-center py-2.5 px-4 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg transition disabled:bg-indigo-400/50"
-            >
-              {loading ? 'Processing...' : (isLoginView ? 'Log In' : 'Sign Up')}
-            </button>
-          </div>
-        </form>
-        <p className="text-center text-sm text-gray-400 mt-6">
-          {isLoginView ? "Don't have an account?" : 'Already have an account?'}
+
+          {error && (
+            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl">
+              <p className="text-red-400 text-sm text-center font-bold tracking-tight">{error}</p>
+            </div>
+          )}
+
           <button
-            onClick={() => {
-              setIsLoginView(!isLoginView);
-              setError(null);
-            }}
-            className="font-medium text-indigo-400 hover:text-indigo-300 ml-1"
+            type="submit"
+            disabled={loading}
+            className="w-full flex justify-center py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl transition-all shadow-xl shadow-indigo-600/20 active:scale-95 disabled:opacity-50 disabled:active:scale-100"
           >
-            {isLoginView ? 'Sign up' : 'Log in'}
+            {loading ? (
+              <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            ) : (isLoginView ? 'Sign In' : 'Create Account')}
           </button>
-        </p>
+        </form>
+
+        <div className="mt-10 pt-8 border-t border-white/5 text-center">
+          <p className="text-sm text-gray-500 font-medium">
+            {isLoginView ? "New here?" : 'Already a member?'}
+            <button
+              onClick={() => {
+                setIsLoginView(!isLoginView);
+                setError(null);
+              }}
+              className="font-black text-indigo-400 hover:text-indigo-300 ml-2 transition-colors"
+            >
+              {isLoginView ? 'Join Now' : 'Sign In'}
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );
