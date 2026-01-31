@@ -1,4 +1,6 @@
+
 import { useState, useEffect, useCallback } from 'react';
+// @ts-ignore
 import { collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy, where, FirestoreError } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';

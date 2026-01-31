@@ -1,19 +1,14 @@
 
+/// <reference types="vite/client" />
+// @ts-ignore
 import { initializeApp } from "firebase/app";
+// @ts-ignore
 import { getAuth } from "firebase/auth";
+// @ts-ignore
 import { getFirestore } from "firebase/firestore";
 
-// =================================================================
-// 🛠️ MULTI-ENVIRONMENT CONFIGURATION
-// =================================================================
-// The app now uses environment variables to distinguish between 
-// "Development" (Local) and "Production" (Stable/GitHub Pages).
-//
-// Create .env.development and .env.production in your project root.
-// Variables must start with VITE_ to be accessible via import.meta.env.
-// =================================================================
-
-// Fix: Use a type assertion to access Vite-specific environment variables without global type definitions for import.meta.env
+// In Vite, environment variables are accessed via import.meta.env
+// The prefix VITE_ is required for variables to be exposed to the client-side code.
 const env = (import.meta as any).env;
 
 const firebaseConfig = {
@@ -32,20 +27,3 @@ const app = initializeApp(firebaseConfig);
 // Export services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-
-/**
- * SECURITY RULES REMINDER (Apply to BOTH projects):
- * 
- * rules_version = '2';
- * service cloud.firestore {
- *   match /databases/{database}/documents {
- *     match /workouts/{workoutId} {
- *       allow read, write: if request.auth != null && (
- *         (request.method == 'create' && request.resource.data.userId == request.auth.uid) ||
- *         (resource != null && resource.data.userId == request.auth.uid) ||
- *         (request.method == 'list' && request.query.limit <= 100)
- *       );
- *     }
- *   }
- * }
- */

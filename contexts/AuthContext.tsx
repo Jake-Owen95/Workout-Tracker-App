@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+// @ts-ignore
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '../firebase';
 

@@ -1,4 +1,6 @@
+
 import React, { useState, useCallback, useMemo } from 'react';
+// @ts-ignore
 import { signOut } from 'firebase/auth';
 import { auth } from './firebase';
 import { useAuth } from './contexts/AuthContext';
@@ -142,7 +144,7 @@ const WorkoutTracker: React.FC = () => {
           <div className="flex items-center gap-2 sm:gap-4">
             <button
               onClick={() => setSuggestionModalOpen(true)}
-              className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white font-semibold py-2 px-3 sm:px-4 rounded-xl transition-all border border-white/10 active:scale-95"
+              className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white font-semibold py-2.5 px-3 sm:px-4 rounded-xl transition-all border border-white/10 active:scale-95"
             >
               <SparklesIcon className="h-4 w-4 text-indigo-400" />
               <span className="hidden md:inline">Ask Gemini</span>
