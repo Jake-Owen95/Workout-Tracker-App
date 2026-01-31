@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 // @ts-ignore
 import { signOut } from 'firebase/auth';
-import { auth, isFirebaseConfigured } from './firebase';
+import { auth, isFirebaseConfigured, isDevMode } from './firebase';
 import { useAuth } from './contexts/AuthContext';
 import { useWorkouts } from './hooks/useWorkouts';
 import type { Workout } from './types';
@@ -133,10 +133,15 @@ const WorkoutTracker: React.FC = () => {
             <div className="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-500/20">
               <DumbbellIcon className="h-6 w-6 text-white" />
             </div>
-            <div>
+            <div className="flex items-center gap-3">
               <h1 className="text-xl font-black tracking-tight text-white uppercase sm:text-2xl">
                 LWJ <span className="text-indigo-400">Tracker</span>
               </h1>
+              {isDevMode && (
+                <span className="hidden sm:inline-block bg-orange-500/10 text-orange-500 text-[10px] font-black px-2 py-0.5 rounded-full border border-orange-500/20 uppercase tracking-widest">
+                  Testing
+                </span>
+              )}
             </div>
           </div>
 

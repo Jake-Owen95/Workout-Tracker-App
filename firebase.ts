@@ -25,8 +25,23 @@ const firebaseConfig = {
 // Check if config is actually present
 export const isFirebaseConfigured = !!firebaseConfig.apiKey && firebaseConfig.apiKey !== "";
 
+// Determine mode (development or production)
+export const isDevMode = (import.meta as any).env?.MODE === 'development';
+
 if (!isFirebaseConfigured) {
   console.error("CRITICAL: Firebase configuration is missing. Ensure VITE_FIREBASE_API_KEY is set.");
+} else {
+  // Enhanced log for debugging environments
+  console.log(
+    `%c[Environment] %c${isDevMode ? 'DEVELOPMENT (TESTING)' : 'PRODUCTION'}`, 
+    "color: #f59e0b; font-weight: bold;", 
+    "color: #fff; font-weight: normal;"
+  );
+  console.log(
+    `%c[Firebase] Project: %c${firebaseConfig.projectId}`, 
+    "color: #6366f1; font-weight: bold;", 
+    "color: #fff; font-weight: normal;"
+  );
 }
 
 const app = initializeApp(firebaseConfig);
